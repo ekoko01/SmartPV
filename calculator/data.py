@@ -1,5 +1,6 @@
 PRODUCTS = [
     {
+        "display_order": 1,
         "sku": "CLD-01",
         "name": "คลอดต้า 1",
         "price": 990.00,
@@ -8,6 +9,7 @@ PRODUCTS = [
         "highlight": "ยอดนิยม",
     },
     {
+        "display_order": 2,
         "sku": "CLD-02",
         "name": "คลอดต้า 2",
         "price": 1190.00,
@@ -16,6 +18,7 @@ PRODUCTS = [
         "highlight": "กำไรดี",
     },
     {
+        "display_order": 3,
         "sku": "CLD-03",
         "name": "คลอดต้า 3",
         "price": 1990.00,
@@ -24,6 +27,7 @@ PRODUCTS = [
         "highlight": "เร่ง PV",
     },
     {
+        "display_order": 4,
         "sku": "COFFEE",
         "name": "กาแฟคัลเลอร์คอฟฟี่พลัส",
         "price": 219.00,
@@ -32,6 +36,7 @@ PRODUCTS = [
         "highlight": "เติมยอด",
     },
     {
+        "display_order": 5,
         "sku": "BAG",
         "name": "โค้ดบังสาถี",
         "price": 350.00,
@@ -40,6 +45,7 @@ PRODUCTS = [
         "highlight": "เสริมภาพลักษณ์",
     },
     {
+        "display_order": 6,
         "sku": "SERUM",
         "name": "PL โกลด์คอลลาเจนเซรั่ม",
         "price": 558.00,
@@ -48,6 +54,7 @@ PRODUCTS = [
         "highlight": "พรีเมียม",
     },
     {
+        "display_order": 7,
         "sku": "BOOKING",
         "name": "ค่ามัดจำ",
         "price": 100.00,
@@ -56,6 +63,7 @@ PRODUCTS = [
         "highlight": "ไม่มี PV",
     },
     {
+        "display_order": 8,
         "sku": "MEMBER",
         "name": "ชุดสมัครสมาชิก",
         "price": 599.00,
