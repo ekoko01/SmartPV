@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="{% static 'calculator/styles.css' %}">
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-block">
+                <p class="eyebrow">PV Smart</p>
+                <h1>ระบบช่วยคำนวณราคาและคะแนน PV อัตโนมัติ</h1>
+                <p class="subcopy">คุมราคา สรุปออเดอร์ และเช็กคะแนนในหน้าเดียวสำหรับทีมขายที่ต้องการความเร็วและความแม่นยำ</p>
+            </div>
+            <div class="hero-note">
+                <span>ใช้งานผ่านเว็บ</span>
+                <strong>ฟรี ไม่ต้องติดตั้ง</strong>
+            </div>
+        </header>
+
+        <main class="workspace">
+            <section class="catalog-panel">
+                <div class="section-head">
+                    <div>
+                        <p class="section-kicker">Workspace</p>
+                        <h2>โปรแกรมคำนวณคะแนน PV</h2>
+                    </div>
+                    <div class="status-pill">พร้อมคำนวณสด</div>
+                </div>
+
+                <div class="product-list" id="product-list">
+                    {% for product in products %}
+                    <article class="product-row" data-name="{{ product.name }}" data-price="{{ product.price }}" data-pv="{{ product.pv }}">
+                        <div class="product-copy">
+                            <div class="product-title-row">
+                                <h3>{{ product.name }}</h3>
+                                {% if product.highlight %}
+                                <span class="highlight">{{ product.highlight }}</span>
+                                {% endif %}
+                            </div>
+                            <p>{{ product.description }}</p>
+                            <div class="meta">
+                                <span>ราคา {{ product.price }} บาท</span>
+                                <span>คะแนน {{ product.pv }} PV</span>
+                            </div>
+                        </div>
+                        <div class="product-controls">
+                            <label>
+                                <span>จำนวน</span>
+                                <input class="quantity-input" type="number" min="0" max="999" value="0">
+                            </label>
+                            <div class="pv-chip">0 PV</div>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+
+                <footer class="catalog-footer">
+                    <div class="customer-field">
+                        <label for="customer-name">ชื่อลูกค้า</label>
+                        <input id="customer-name" type="text" value="{{ customer_name }}">
+                    </div>
+                    <div class="totals-strip">
+                        <p>ราคารวม <strong id="grand-total">0.00</strong> บาท</p>
+                        <p>คะแนน PV รวม <strong id="grand-pv">0.00</strong></p>
+                    </div>
+                    <button id="clear-all" class="primary-action" type="button">เริ่มออเดอร์ใหม่</button>
+                </footer>
+            </section>
+
+            <aside class="summary-panel">
+                <section class="promo-stage">
+                    <div class="phone-orbit">
+                        <div class="phone-frame">
+                            <div class="phone-screen">
+                                <div class="receipt-line"></div>
+                                <div class="receipt-line short"></div>
+                                <div class="receipt-line"></div>
+                                <div class="receipt-badge">PV</div>
+                                <div class="receipt-check">✓</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="promo-copy">
+                        <p class="section-kicker">PV Smart</p>
+                        <h2>สรุปยอดในหน้าเดียว ส่งต่อได้ทันที</h2>
+                        <ul>
+                            <li>ลดความผิดพลาดจากการคิดมือ</li>
+                            <li>เห็นราคารวมและคะแนนรวมทันที</li>
+                            <li>เหมาะกับการขายผ่านแชต โทร หรือหน้าร้าน</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="summary-sheet">
+                    <div class="sheet-head">
+                        <div>
+                            <p class="section-kicker">Order Snapshot</p>
+                            <h2>สรุปรายการสั่งซื้อ</h2>
+                        </div>
+                        <div class="sheet-meta">
+                            <span id="summary-customer">{{ customer_name }}</span>
+                            <span>{{ order_date }}</span>
+                        </div>
+                    </div>
+
+                    <div class="summary-table">
+                        <div class="summary-header">
+                            <span>รายการสินค้า</span>
+                            <span>จำนวน</span>
+                            <span>ราคารวม</span>
+                            <span>คะแนน PV</span>
+                        </div>
+                        <div id="summary-items" class="summary-items"></div>
+                    </div>
+
+                    <div class="summary-footer">
+                        <p>ราคารวมทั้งหมด <strong id="sheet-total">0.00 บาท</strong></p>
+                        <p>คะแนน PV รวม <strong id="sheet-pv">0.00</strong></p>
+                    </div>
+                </section>
+            </aside>
+        </main>
+    </div>
+    <script src="{% static 'calculator/app.js' %}"></script>
+</body>
+</html>

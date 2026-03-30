@@ -1,0 +1,12 @@
+from django.test import TestCase
+from django.urls import reverse
+
+
+class CalculatorPageTests(TestCase):
+    def test_home_page_renders(self):
+        response = self.client.get(reverse("calculator:home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "ระบบช่วยคำนวณราคาและคะแนน PV อัตโนมัติ")
+
+# Create your tests here.
