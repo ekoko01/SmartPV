@@ -55,6 +55,11 @@ body::before {
     margin-bottom: 26px;
 }
 
+.compact-hero {
+    grid-template-columns: 1fr;
+    margin-bottom: 18px;
+}
+
 .eyebrow,
 .section-kicker {
     margin: 0 0 10px;
@@ -73,7 +78,7 @@ body::before {
 
 .hero h1 {
     max-width: 12ch;
-    font-size: clamp(2.4rem, 3.8vw, 4.5rem);
+    font-size: clamp(2.2rem, 3vw, 3.5rem);
 }
 
 .subcopy {
@@ -82,6 +87,12 @@ body::before {
     color: rgba(246, 251, 248, 0.78);
     font-size: 1.02rem;
     line-height: 1.6;
+}
+
+.hero-quote {
+    margin-top: 8px;
+    font-size: 1.08rem;
+    color: rgba(246, 251, 248, 0.86);
 }
 
 .hero-badge {

@@ -1,136 +1,161 @@
 {% load static %}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ page_title }}</title>
-    <link rel="stylesheet" href="{% static 'calculator/styles.css' %}">
-</head>
-<body>
+    <link rel="stylesheet" href="{% static 'calculator/styles.css' %}" />
+  </head>
+  <body>
     <div class="app-shell">
-        <main class="workspace">
-            <section class="builder-panel">
-                <div class="panel-head">
-                    <div>
-                        <p class="section-kicker">Order Builder</p>
-                        <h2>สร้างรายการสั่งซื้อจากจุดเดียว</h2>
-                    </div>
-                </div>
+      <header class="hero compact-hero">
+        <div class="hero-copy">
+          <p class="eyebrow">PV Smart</p>
+          <h1>PV Smart</h1>
+          <p class="subcopy hero-quote">สุขภาพดี ชีวิตดี อยู่ที่คุณ</p>
+        </div>
+      </header>
 
-                <div class="builder-topbar">
-                    <label class="customer-field" for="customer-name">
-                        <span>ชื่อลูกค้า</span>
-                        <input id="customer-name" type="text" placeholder="พิมพ์ชื่อลูกค้า">
-                    </label>
-                    <div class="builder-note">
-                        <span>ข้อมูลราคากับ PV จะดึงตามสินค้าที่เลือกอัตโนมัติ</span>
-                    </div>
-                </div>
+      <main class="workspace">
+        <section class="builder-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">Order Builder</p>
+              <h2>สร้รายการสั่งซื้อ</h2>
+            </div>
+          </div>
 
-                <section class="order-grid">
-                    <div class="order-grid-head">
-                        <span>สินค้า</span>
-                        <span>ราคา / PV</span>
-                        <span>จำนวน</span>
-                        <span>รวม</span>
-                        <span></span>
-                    </div>
-                    <div id="order-rows" class="order-rows"></div>
-                </section>
+          <div class="builder-topbar">
+            <label class="customer-field" for="customer-name">
+              <span>ชื่อลูกค้า</span>
+              <input
+                id="customer-name"
+                type="text"
+                placeholder="พิมพ์ชื่อลูกค้า"
+              />
+            </label>
+            <div class="builder-note">
+              <span>ข้อมูลราคากับ PV จะดึงตามสินค้าที่เลือกอัตโนมัติ</span>
+            </div>
+          </div>
 
-                <div class="builder-footer">
-                    <div class="footer-tools">
-                        <button id="add-row" class="ghost-action" type="button">+ เพิ่มรายการสินค้า</button>
-                        <button id="clear-all" class="ghost-action" type="button">ล้างรายการ</button>
-                    </div>
-                    <div class="footer-actions">
-                        <div class="totals-strip">
-                            <p>ราคารวม <strong id="grand-total">0.00</strong> บาท</p>
-                            <p>คะแนน PV รวม <strong id="grand-pv">0.00</strong></p>
-                        </div>
-                        <button id="save-order" class="primary-action" type="button">บันทึกรูปภาพและออเดอร์</button>
-                    </div>
-                </div>
-                <p id="save-status" class="save-status" aria-live="polite"></p>
-            </section>
+          <section class="order-grid">
+            <div class="order-grid-head">
+              <span>สินค้า</span>
+              <span>ราคา / PV</span>
+              <span>จำนวน</span>
+              <span>รวม</span>
+              <span></span>
+            </div>
+            <div id="order-rows" class="order-rows"></div>
+          </section>
 
-            <aside class="snapshot-panel">
-                <section class="snapshot-sheet" id="snapshot-card">
-                    <div class="snapshot-head">
-                        <div>
-                            <p class="section-kicker">Order Snapshot</p>
-                            <h2>สรุปรายการสั่งซื้อ</h2>
-                        </div>
-                        <div class="sheet-meta">
-                            <span id="summary-customer">ยังไม่ได้ระบุชื่อลูกค้า</span>
-                            <span id="summary-datetime"></span>
-                        </div>
-                    </div>
+          <div class="builder-footer">
+            <div class="footer-tools">
+              <button id="add-row" class="ghost-action" type="button">
+                + เพิ่มรายการสินค้า
+              </button>
+              <button id="clear-all" class="ghost-action" type="button">
+                ล้างรายการ
+              </button>
+            </div>
+            <div class="footer-actions">
+              <div class="totals-strip">
+                <p>ราคารวม <strong id="grand-total">0.00</strong> บาท</p>
+                <p>คะแนน PV รวม <strong id="grand-pv">0.00</strong></p>
+              </div>
+              <button id="save-order" class="primary-action" type="button">
+                บันทึกรูปภาพและออเดอร์
+              </button>
+            </div>
+          </div>
+          <p id="save-status" class="save-status" aria-live="polite"></p>
+        </section>
 
-                    <div class="summary-table">
-                        <div class="summary-header">
-                            <span>รายการสินค้า</span>
-                            <span>จำนวน</span>
-                            <span>ราคารวม</span>
-                            <span>คะแนน PV</span>
-                        </div>
-                        <div id="summary-items" class="summary-items"></div>
-                    </div>
+        <aside class="snapshot-panel">
+          <section class="snapshot-sheet" id="snapshot-card">
+            <div class="snapshot-head">
+              <div>
+                <p class="section-kicker">Order Snapshot</p>
+                <h2>สรุปรายการสั่งซื้อ</h2>
+              </div>
+              <div class="sheet-meta">
+                <span id="summary-customer">ยังไม่ได้ระบุชื่อลูกค้า</span>
+                <span id="summary-datetime"></span>
+              </div>
+            </div>
 
-                    <div class="summary-footer">
-                        <p>ราคารวมทั้งหมด <strong id="sheet-total">0.00 บาท</strong></p>
-                        <p>คะแนน PV รวม <strong id="sheet-pv">0.00</strong></p>
-                    </div>
-                </section>
-            </aside>
-        </main>
+            <div class="summary-table">
+              <div class="summary-header">
+                <span>รายการสินค้า</span>
+                <span>จำนวน</span>
+                <span>ราคารวม</span>
+                <span>คะแนน PV</span>
+              </div>
+              <div id="summary-items" class="summary-items"></div>
+            </div>
+
+            <div class="summary-footer">
+              <p>ราคารวมทั้งหมด <strong id="sheet-total">0.00 บาท</strong></p>
+              <p>คะแนน PV รวม <strong id="sheet-pv">0.00</strong></p>
+            </div>
+          </section>
+        </aside>
+      </main>
     </div>
 
     <template id="order-row-template">
-        <article class="order-row">
-            <label class="product-picker">
-                <span class="mobile-label">สินค้า</span>
-                <select class="product-select">
-                    <option value="">เลือกสินค้า</option>
-                    {% for product in products %}
-                    <option value="{{ product.sku }}" data-name="{{ product.name }}" data-price="{{ product.price }}" data-pv="{{ product.pv }}">
-                        {{ product.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </label>
+      <article class="order-row">
+        <label class="product-picker">
+          <span class="mobile-label">สินค้า</span>
+          <select class="product-select">
+            <option value="">เลือกสินค้า</option>
+            {% for product in products %}
+            <option
+              value="{{ product.sku }}"
+              data-name="{{ product.name }}"
+              data-price="{{ product.price }}"
+              data-pv="{{ product.pv }}"
+            >
+              {{ product.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </label>
 
-            <div class="product-metrics">
-                <span class="mobile-label">ราคา / PV</span>
-                <div>
-                    <strong class="unit-price">0.00 บาท</strong>
-                    <span class="unit-pv">0 PV</span>
-                </div>
-            </div>
+        <div class="product-metrics">
+          <span class="mobile-label">ราคา / PV</span>
+          <div>
+            <strong class="unit-price">0.00 บาท</strong>
+            <span class="unit-pv">0 PV</span>
+          </div>
+        </div>
 
-            <div class="quantity-stepper">
-                <span class="mobile-label">จำนวน</span>
-                <div class="stepper-shell">
-                    <button class="stepper-btn decrement" type="button">-</button>
-                    <input class="quantity-input" type="number" min="1" value="1">
-                    <button class="stepper-btn increment" type="button">+</button>
-                </div>
-            </div>
+        <div class="quantity-stepper">
+          <span class="mobile-label">จำนวน</span>
+          <div class="stepper-shell">
+            <button class="stepper-btn decrement" type="button">-</button>
+            <input class="quantity-input" type="number" min="1" value="1" />
+            <button class="stepper-btn increment" type="button">+</button>
+          </div>
+        </div>
 
-            <div class="line-summary">
-                <span class="mobile-label">รวม</span>
-                <div>
-                    <strong class="line-total">0.00 บาท</strong>
-                    <span class="line-pv">0 PV</span>
-                </div>
-            </div>
+        <div class="line-summary">
+          <span class="mobile-label">รวม</span>
+          <div>
+            <strong class="line-total">0.00 บาท</strong>
+            <span class="line-pv">0 PV</span>
+          </div>
+        </div>
 
-            <button class="remove-row" type="button" aria-label="ลบรายการ">ลบ</button>
-        </article>
+        <button class="remove-row" type="button" aria-label="ลบรายการ">
+          ลบ
+        </button>
+      </article>
     </template>
 
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="{% static 'calculator/app.js' %}"></script>
-</body>
+  </body>
 </html>
