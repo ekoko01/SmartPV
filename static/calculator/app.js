@@ -25,6 +25,12 @@ const clearAllButton = document.getElementById("clear-all");
 const saveOrderButton = document.getElementById("save-order");
 const saveStatus = document.getElementById("save-status");
 const snapshotCard = document.getElementById("snapshot-card");
+const snapshotPreviewModal = document.getElementById("snapshot-preview-modal");
+const snapshotPreviewImage = document.getElementById("snapshot-preview-image");
+const sharePreviewButton = document.getElementById("share-preview");
+const openPreviewButton = document.getElementById("open-preview");
+const closePreviewButton = document.getElementById("close-preview");
+let currentSnapshotAsset = null;
 
 function canvasToBlob(canvas) {
     return new Promise((resolve, reject) => {
@@ -86,6 +92,66 @@ async function shareOrDownloadSnapshot(canvas, customerName, pendingWindow = nul
 
     window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
     return "downloaded";
+}
+
+async function createSnapshotAsset(canvas, customerName) {
+    const blob = await canvasToBlob(canvas);
+    const safeCustomer = customerName.replace(/\s+/g, "-");
+    const filename = `pvsmart-${safeCustomer}-${Date.now()}.png`;
+    const blobUrl = URL.createObjectURL(blob);
+    const asset = {
+        blob,
+        blobUrl,
+        filename,
+        file: typeof File !== "undefined" ? new File([blob], filename, { type: "image/png" }) : null,
+    };
+    return asset;
+}
+
+function revokeCurrentSnapshotAsset() {
+    if (currentSnapshotAsset?.blobUrl) {
+        URL.revokeObjectURL(currentSnapshotAsset.blobUrl);
+    }
+    currentSnapshotAsset = null;
+}
+
+function openSnapshotPreview(asset) {
+    revokeCurrentSnapshotAsset();
+    currentSnapshotAsset = asset;
+    snapshotPreviewImage.src = asset.blobUrl;
+    snapshotPreviewModal.hidden = false;
+}
+
+function closeSnapshotPreview() {
+    snapshotPreviewModal.hidden = true;
+}
+
+async function shareCurrentPreview() {
+    if (!currentSnapshotAsset) {
+        return;
+    }
+
+    if (
+        currentSnapshotAsset.file &&
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare({ files: [currentSnapshotAsset.file] })
+    ) {
+        await navigator.share({
+            title: "PV Smart Order Snapshot",
+            files: [currentSnapshotAsset.file],
+        });
+        return;
+    }
+
+    window.open(currentSnapshotAsset.blobUrl, "_blank", "noopener,noreferrer");
+}
+
+function openCurrentPreview() {
+    if (!currentSnapshotAsset) {
+        return;
+    }
+    window.open(currentSnapshotAsset.blobUrl, "_blank", "noopener,noreferrer");
 }
 
 function getCsrfToken() {
@@ -221,7 +287,6 @@ function refreshSummary() {
 }
 
 async function saveOrder() {
-    const pendingWindow = isMobileDevice() ? window.open("", "_blank") : null;
     const customerName = customerNameInput.value.trim();
     const items = [...orderRows.querySelectorAll(".order-row")]
         .map(getSelectedItemData)
@@ -249,7 +314,9 @@ async function saveOrder() {
             backgroundColor: "#eef5ef",
             scale: 2,
         });
-        const snapshotMode = await shareOrDownloadSnapshot(canvas, customerName, pendingWindow);
+        const snapshotMode = isMobileDevice()
+            ? (openSnapshotPreview(await createSnapshotAsset(canvas, customerName)), "preview")
+            : await shareOrDownloadSnapshot(canvas, customerName);
 
         const response = await fetch("/api/orders/save/", {
             method: "POST",
@@ -271,13 +338,12 @@ async function saveOrder() {
         saveStatus.textContent =
             snapshotMode === "shared"
                 ? `บันทึกสำเร็จ ออเดอร์ #${data.order_id} และเปิดหน้าส่งรูปภาพแล้ว`
+                : snapshotMode === "preview"
+                    ? `บันทึกสำเร็จ ออเดอร์ #${data.order_id} แล้ว กดปุ่มแชร์รูปภาพหรือเปิดรูปภาพต่อได้เลย`
                 : snapshotMode === "opened"
                     ? `บันทึกสำเร็จ ออเดอร์ #${data.order_id} และเปิดรูปภาพแล้ว กดค้างหรือใช้เมนูแชร์ได้เลย`
                 : `บันทึกสำเร็จ ออเดอร์ #${data.order_id} และดาวน์โหลดรูปภาพแล้ว`;
     } catch (error) {
-        if (pendingWindow && !pendingWindow.closed) {
-            pendingWindow.close();
-        }
         saveStatus.textContent = "บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
     } finally {
         saveOrderButton.disabled = false;
@@ -298,6 +364,15 @@ clearAllButton.addEventListener("click", () => {
 
 customerNameInput.addEventListener("input", refreshSummary);
 saveOrderButton.addEventListener("click", saveOrder);
+sharePreviewButton.addEventListener("click", async () => {
+    try {
+        await shareCurrentPreview();
+    } catch (error) {
+        saveStatus.textContent = "แชร์รูปภาพไม่สำเร็จ ลองกดเปิดรูปภาพแทน";
+    }
+});
+openPreviewButton.addEventListener("click", openCurrentPreview);
+closePreviewButton.addEventListener("click", closeSnapshotPreview);
 
 orderRows.appendChild(createRow());
 updateTimestamp();

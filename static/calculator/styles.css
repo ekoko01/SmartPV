@@ -323,6 +323,48 @@ body::before {
     font-weight: 700;
 }
 
+.snapshot-preview-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(5, 16, 20, 0.72);
+    backdrop-filter: blur(10px);
+}
+
+.snapshot-preview-sheet {
+    width: min(100%, 560px);
+    max-height: min(92vh, 900px);
+    overflow: auto;
+    padding: 20px;
+    border-radius: 28px;
+    background: linear-gradient(180deg, #f4faf6 0%, #edf5ef 100%);
+    box-shadow: var(--shadow);
+}
+
+.snapshot-preview-head,
+.snapshot-preview-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+
+.snapshot-preview-head h3 {
+    margin: 0;
+    color: var(--ink);
+}
+
+.snapshot-preview-image {
+    display: block;
+    width: 100%;
+    margin: 16px 0;
+    border-radius: 20px;
+    border: 1px solid rgba(18, 54, 39, 0.08);
+}
+
 .snapshot-panel {
     position: sticky;
     top: 20px;
@@ -437,6 +479,12 @@ body::before {
 
     .footer-tools {
         width: 100%;
+    }
+
+    .snapshot-preview-head,
+    .snapshot-preview-actions {
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .hero h1 {

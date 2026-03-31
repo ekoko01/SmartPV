@@ -22,7 +22,7 @@
           <div class="panel-head">
             <div>
               <p class="section-kicker">Order Builder</p>
-              <h2>สร้รายการสั่งซื้อ</h2>
+              <h2>รายการสั่งซื้อ</h2>
             </div>
           </div>
 
@@ -154,6 +154,23 @@
         </button>
       </article>
     </template>
+
+    <div id="snapshot-preview-modal" class="snapshot-preview-modal" hidden>
+      <div class="snapshot-preview-sheet">
+        <div class="snapshot-preview-head">
+          <div>
+            <p class="section-kicker">Mobile Snapshot</p>
+            <h3>รูปภาพพร้อมส่งให้ลูกค้า</h3>
+          </div>
+          <button id="close-preview" class="ghost-action" type="button">ปิด</button>
+        </div>
+        <img id="snapshot-preview-image" class="snapshot-preview-image" alt="Order snapshot preview" />
+        <div class="snapshot-preview-actions">
+          <button id="share-preview" class="primary-action" type="button">แชร์รูปภาพ</button>
+          <button id="open-preview" class="ghost-action" type="button">เปิดรูปภาพ</button>
+        </div>
+      </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="{% static 'calculator/app.js' %}"></script>
