@@ -334,6 +334,10 @@ body::before {
     backdrop-filter: blur(10px);
 }
 
+.snapshot-preview-modal[hidden] {
+    display: none;
+}
+
 .snapshot-preview-sheet {
     width: min(100%, 560px);
     max-height: min(92vh, 900px);
