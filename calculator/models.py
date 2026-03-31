@@ -10,6 +10,8 @@ class Product(models.Model):
     highlight = models.CharField(max_length=64, blank=True)
     is_active = models.BooleanField(default=True)
     display_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["display_order", "name"]

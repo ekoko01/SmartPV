@@ -1,0 +1,13 @@
+{% extends "admin/base.html" %}
+
+{% block title %}PV Smart Admin{% endblock %}
+
+{% block branding %}
+<div class="pvsmart-branding">
+    <span class="pvsmart-mark">PV SMART</span>
+    <div>
+        <h1 id="site-name"><a href="{% url 'admin:index' %}">ศูนย์จัดการสินค้า PV Smart</a></h1>
+        <p class="pvsmart-tagline">แก้สินค้า ราคา และคะแนน PV จากจุดเดียว</p>
+    </div>
+</div>
+{% endblock %}

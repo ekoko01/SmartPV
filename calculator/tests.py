@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.core.management import call_command
+from django.contrib.auth import get_user_model
 
 from .models import Product
 
@@ -17,5 +18,24 @@ class CalculatorPageTests(TestCase):
 
         self.assertEqual(Product.objects.count(), 8)
         self.assertTrue(Product.objects.filter(sku="CLD-01", name="คลอดต้า 1").exists())
+
+
+class ProductAdminTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_superuser(
+            username="admin",
+            email="admin@example.com",
+            password="password123",
+        )
+        self.client.force_login(self.user)
+        call_command("seed_products")
+
+    def test_admin_changelist_renders_custom_summary(self):
+        response = self.client.get(reverse("admin:calculator_product_changelist"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "จัดการสินค้า ราคา และคะแนน PV")
+        self.assertContains(response, "สินค้าทั้งหมด")
 
 # Create your tests here.

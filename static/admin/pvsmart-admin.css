@@ -1,0 +1,78 @@
+#header {
+    background:
+        radial-gradient(circle at left, rgba(44, 214, 130, 0.28), transparent 26%),
+        linear-gradient(135deg, #07151e 0%, #0b2833 54%, #135845 100%);
+    color: #f8fffc;
+}
+
+#header a:link,
+#header a:visited {
+    color: #f8fffc;
+}
+
+.pvsmart-branding {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.pvsmart-mark {
+    display: inline-flex;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(238, 255, 244, 0.12);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+}
+
+.pvsmart-tagline {
+    margin: 4px 0 0;
+    color: rgba(248, 255, 252, 0.76);
+}
+
+.pvsmart-admin-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin: 0 0 20px;
+}
+
+.pvsmart-admin-summary article {
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #f4fbf6 0%, #ecf8f0 100%);
+    border: 1px solid #d9efe0;
+}
+
+.pvsmart-admin-summary span {
+    display: block;
+    margin-bottom: 8px;
+    color: #507060;
+    font-size: 0.9rem;
+}
+
+.pvsmart-admin-summary strong {
+    color: #12422d;
+    font-size: 1.75rem;
+}
+
+.change-list .results th,
+.change-list .results td {
+    vertical-align: middle;
+}
+
+.change-list .results td input,
+.change-list .results td select {
+    min-width: 90px;
+}
+
+.submit-row input.default {
+    background: #16834a;
+}
+
+@media (max-width: 960px) {
+    .pvsmart-admin-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
