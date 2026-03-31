@@ -15,7 +15,7 @@ class CalculatorPageTests(TestCase):
         response = self.client.get(reverse("calculator:home"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "พื้นที่สรุปออเดอร์เดียวที่พร้อมขาย พร้อมส่ง และพร้อมเก็บรายงาน")
+        self.assertContains(response, "สร้างรายการสั่งซื้อจากจุดเดียว")
 
     def test_seed_products_command_populates_catalog(self):
         call_command("seed_products")
