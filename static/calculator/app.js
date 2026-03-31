@@ -144,17 +144,33 @@ async function shareCurrentPreview() {
         return;
     }
 
-    if (
-        currentSnapshotAsset.file &&
-        navigator.share &&
-        navigator.canShare &&
-        navigator.canShare({ files: [currentSnapshotAsset.file] })
-    ) {
-        await navigator.share({
-            title: "PV Smart Order Snapshot",
-            files: [currentSnapshotAsset.file],
-        });
-        return;
+    if (navigator.share) {
+        if (
+            currentSnapshotAsset.file &&
+            navigator.canShare &&
+            navigator.canShare({ files: [currentSnapshotAsset.file] })
+        ) {
+            try {
+                await navigator.share({
+                    title: "PV Smart Order Snapshot",
+                    files: [currentSnapshotAsset.file],
+                });
+                return;
+            } catch (error) {
+                // Fall back to URL/text share or open flow below.
+            }
+        }
+
+        try {
+            await navigator.share({
+                title: "PV Smart Order Snapshot",
+                text: "เปิดรูปภาพ snapshot เพื่อส่งต่อให้ลูกค้า",
+                url: currentSnapshotAsset.blobUrl,
+            });
+            return;
+        } catch (error) {
+            // Fall back to opening the image below.
+        }
     }
 
     window.open(currentSnapshotAsset.blobUrl, "_blank", "noopener,noreferrer");
@@ -383,7 +399,8 @@ sharePreviewButton.addEventListener("click", async () => {
     try {
         await shareCurrentPreview();
     } catch (error) {
-        saveStatus.textContent = "แชร์รูปภาพไม่สำเร็จ ลองกดเปิดรูปภาพแทน";
+        openCurrentPreview();
+        saveStatus.textContent = "แชร์ตรงไม่สำเร็จ จึงเปิดรูปภาพให้แล้ว ใช้เมนูแชร์ของ Chrome ต่อได้เลย";
     }
 });
 openPreviewButton.addEventListener("click", openCurrentPreview);
