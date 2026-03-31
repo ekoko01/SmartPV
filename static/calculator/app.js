@@ -38,32 +38,51 @@ function canvasToBlob(canvas) {
     });
 }
 
-async function shareOrDownloadSnapshot(canvas, customerName) {
+function isMobileDevice() {
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+async function shareOrDownloadSnapshot(canvas, customerName, pendingWindow = null) {
     const blob = await canvasToBlob(canvas);
     const safeCustomer = customerName.replace(/\s+/g, "-");
     const filename = `pvsmart-${safeCustomer}-${Date.now()}.png`;
-    const file = new File([blob], filename, { type: "image/png" });
+    const blobUrl = URL.createObjectURL(blob);
 
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-            title: "PV Smart Order Snapshot",
-            text: `สรุปรายการสั่งซื้อของ ${customerName}`,
-            files: [file],
-        });
-        return "shared";
+    if (
+        typeof File !== "undefined" &&
+        navigator.share &&
+        navigator.canShare
+    ) {
+        const file = new File([blob], filename, { type: "image/png" });
+
+        if (navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    title: "PV Smart Order Snapshot",
+                    text: `สรุปรายการสั่งซื้อของ ${customerName}`,
+                    files: [file],
+                });
+                window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+                return "shared";
+            } catch (error) {
+                // Fall through to open/download flow on mobile browsers that reject sharing.
+            }
+        }
     }
 
-    const blobUrl = URL.createObjectURL(blob);
+    if (isMobileDevice()) {
+        if (pendingWindow && !pendingWindow.closed) {
+            pendingWindow.location.href = blobUrl;
+        } else {
+            window.location.href = blobUrl;
+        }
+        return "opened";
+    }
+
     const link = document.createElement("a");
     link.download = filename;
     link.href = blobUrl;
     link.click();
-
-    // Mobile browsers may ignore download links; opening the image gives the user
-    // a reliable fallback path to save/share it manually.
-    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        window.open(blobUrl, "_blank", "noopener,noreferrer");
-    }
 
     window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
     return "downloaded";
@@ -202,6 +221,7 @@ function refreshSummary() {
 }
 
 async function saveOrder() {
+    const pendingWindow = isMobileDevice() ? window.open("", "_blank") : null;
     const customerName = customerNameInput.value.trim();
     const items = [...orderRows.querySelectorAll(".order-row")]
         .map(getSelectedItemData)
@@ -229,7 +249,7 @@ async function saveOrder() {
             backgroundColor: "#eef5ef",
             scale: 2,
         });
-        const snapshotMode = await shareOrDownloadSnapshot(canvas, customerName);
+        const snapshotMode = await shareOrDownloadSnapshot(canvas, customerName, pendingWindow);
 
         const response = await fetch("/api/orders/save/", {
             method: "POST",
@@ -251,8 +271,13 @@ async function saveOrder() {
         saveStatus.textContent =
             snapshotMode === "shared"
                 ? `บันทึกสำเร็จ ออเดอร์ #${data.order_id} และเปิดหน้าส่งรูปภาพแล้ว`
+                : snapshotMode === "opened"
+                    ? `บันทึกสำเร็จ ออเดอร์ #${data.order_id} และเปิดรูปภาพแล้ว กดค้างหรือใช้เมนูแชร์ได้เลย`
                 : `บันทึกสำเร็จ ออเดอร์ #${data.order_id} และดาวน์โหลดรูปภาพแล้ว`;
     } catch (error) {
+        if (pendingWindow && !pendingWindow.closed) {
+            pendingWindow.close();
+        }
         saveStatus.textContent = "บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
     } finally {
         saveOrderButton.disabled = false;
