@@ -26,6 +26,49 @@ const saveOrderButton = document.getElementById("save-order");
 const saveStatus = document.getElementById("save-status");
 const snapshotCard = document.getElementById("snapshot-card");
 
+function canvasToBlob(canvas) {
+    return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+            if (blob) {
+                resolve(blob);
+            } else {
+                reject(new Error("blob_failed"));
+            }
+        }, "image/png");
+    });
+}
+
+async function shareOrDownloadSnapshot(canvas, customerName) {
+    const blob = await canvasToBlob(canvas);
+    const safeCustomer = customerName.replace(/\s+/g, "-");
+    const filename = `pvsmart-${safeCustomer}-${Date.now()}.png`;
+    const file = new File([blob], filename, { type: "image/png" });
+
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+            title: "PV Smart Order Snapshot",
+            text: `สรุปรายการสั่งซื้อของ ${customerName}`,
+            files: [file],
+        });
+        return "shared";
+    }
+
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = blobUrl;
+    link.click();
+
+    // Mobile browsers may ignore download links; opening the image gives the user
+    // a reliable fallback path to save/share it manually.
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        window.open(blobUrl, "_blank", "noopener,noreferrer");
+    }
+
+    window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    return "downloaded";
+}
+
 function getCsrfToken() {
     const value = `; ${document.cookie}`;
     const parts = value.split("; csrftoken=");
@@ -186,11 +229,7 @@ async function saveOrder() {
             backgroundColor: "#eef5ef",
             scale: 2,
         });
-        const link = document.createElement("a");
-        const safeCustomer = customerName.replace(/\s+/g, "-");
-        link.download = `pvsmart-${safeCustomer}-${Date.now()}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
+        const snapshotMode = await shareOrDownloadSnapshot(canvas, customerName);
 
         const response = await fetch("/api/orders/save/", {
             method: "POST",
@@ -209,7 +248,10 @@ async function saveOrder() {
         }
 
         const data = await response.json();
-        saveStatus.textContent = `บันทึกสำเร็จ ออเดอร์ #${data.order_id} และดาวน์โหลดรูปภาพแล้ว`;
+        saveStatus.textContent =
+            snapshotMode === "shared"
+                ? `บันทึกสำเร็จ ออเดอร์ #${data.order_id} และเปิดหน้าส่งรูปภาพแล้ว`
+                : `บันทึกสำเร็จ ออเดอร์ #${data.order_id} และดาวน์โหลดรูปภาพแล้ว`;
     } catch (error) {
         saveStatus.textContent = "บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
     } finally {
