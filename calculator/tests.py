@@ -2,6 +2,8 @@ from django.test import TestCase
 from django.urls import reverse
 from django.core.management import call_command
 from django.contrib.auth import get_user_model
+from io import StringIO
+from unittest.mock import patch
 
 from .models import Product
 
@@ -37,5 +39,24 @@ class ProductAdminTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "จัดการสินค้า ราคา และคะแนน PV")
         self.assertContains(response, "สินค้าทั้งหมด")
+
+
+class EnsureSuperuserCommandTests(TestCase):
+    def test_command_creates_superuser_from_env(self):
+        out = StringIO()
+
+        with patch.dict(
+            "os.environ",
+            {
+                "DJANGO_SUPERUSER_USERNAME": "renderadmin",
+                "DJANGO_SUPERUSER_EMAIL": "renderadmin@example.com",
+                "DJANGO_SUPERUSER_PASSWORD": "StrongPassword123",
+            },
+            clear=False,
+        ):
+            call_command("ensure_superuser", stdout=out)
+
+        User = get_user_model()
+        self.assertTrue(User.objects.filter(username="renderadmin", is_superuser=True).exists())
 
 # Create your tests here.
