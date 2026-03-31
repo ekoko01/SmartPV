@@ -390,11 +390,12 @@ body::before {
 }
 
 .snapshot-export-mode .snapshot-head {
-    align-items: start;
+    align-items: end;
+    grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .snapshot-export-mode h2 {
-    font-size: 3rem;
+    font-size: 3.1rem;
 }
 
 .snapshot-export-mode .section-kicker {
@@ -403,8 +404,22 @@ body::before {
 }
 
 .snapshot-export-mode .sheet-meta {
-    min-width: 280px;
-    font-size: 1.05rem;
+    min-width: 250px;
+    font-size: 1rem;
+    color: #355447;
+}
+
+.snapshot-export-mode #summary-customer {
+    font-size: 1.52rem;
+    font-weight: 800;
+    color: #17352a;
+    line-height: 1.2;
+}
+
+.snapshot-export-mode #summary-datetime {
+    font-size: 1.18rem;
+    font-weight: 600;
+    color: #4d675d;
 }
 
 .snapshot-export-mode .summary-table {
@@ -414,8 +429,8 @@ body::before {
 
 .snapshot-export-mode .summary-header,
 .snapshot-export-mode .summary-item {
-    grid-template-columns: minmax(0, 2fr) 120px 200px 180px;
-    gap: 18px;
+    grid-template-columns: minmax(0, 1.9fr) 90px 170px 150px;
+    gap: 14px;
     padding: 18px 24px;
     font-size: 1.05rem;
 }
@@ -425,6 +440,23 @@ body::before {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.snapshot-export-mode .summary-header {
+    font-size: 1.16rem;
+}
+
+.snapshot-export-mode .summary-item {
+    font-size: 1.22rem;
+}
+
+.snapshot-export-mode .summary-item span:nth-child(2),
+.snapshot-export-mode .summary-item span:nth-child(3),
+.snapshot-export-mode .summary-item span:nth-child(4),
+.snapshot-export-mode .summary-header span:nth-child(2),
+.snapshot-export-mode .summary-header span:nth-child(3),
+.snapshot-export-mode .summary-header span:nth-child(4) {
+    justify-self: end;
 }
 
 .snapshot-export-mode .summary-footer {
