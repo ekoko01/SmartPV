@@ -32,6 +32,19 @@ const openPreviewButton = document.getElementById("open-preview");
 const closePreviewButton = document.getElementById("close-preview");
 let currentSnapshotAsset = null;
 
+function createExportSnapshotNode() {
+    const exportWrapper = document.createElement("div");
+    exportWrapper.className = "snapshot-export-canvas";
+
+    const snapshotClone = snapshotCard.cloneNode(true);
+    snapshotClone.id = "snapshot-card-export";
+    snapshotClone.classList.add("snapshot-export-mode");
+
+    exportWrapper.appendChild(snapshotClone);
+    document.body.appendChild(exportWrapper);
+    return exportWrapper;
+}
+
 function canvasToBlob(canvas) {
     return new Promise((resolve, reject) => {
         canvas.toBlob((blob) => {
@@ -310,10 +323,12 @@ async function saveOrder() {
     saveStatus.textContent = "กำลังบันทึกรูปภาพและออเดอร์...";
 
     try {
-        const canvas = await window.html2canvas(snapshotCard, {
+        const exportNode = createExportSnapshotNode();
+        const canvas = await window.html2canvas(exportNode, {
             backgroundColor: "#eef5ef",
             scale: 2,
         });
+        exportNode.remove();
         const snapshotMode = isMobileDevice()
             ? (openSnapshotPreview(await createSnapshotAsset(canvas, customerName)), "preview")
             : await shareOrDownloadSnapshot(canvas, customerName);

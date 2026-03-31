@@ -369,6 +369,77 @@ body::before {
     border: 1px solid rgba(18, 54, 39, 0.08);
 }
 
+.snapshot-export-canvas {
+    position: fixed;
+    left: -99999px;
+    top: 0;
+    width: 1440px;
+    padding: 40px;
+    background:
+        radial-gradient(circle at top left, rgba(128, 240, 178, 0.08), transparent 24%),
+        linear-gradient(135deg, #e9f3ea 0%, #edf5ef 100%);
+}
+
+.snapshot-export-mode {
+    width: 100%;
+    min-height: 810px;
+    padding: 36px 42px;
+    border-radius: 40px;
+    box-shadow: none;
+    background: linear-gradient(180deg, rgba(242, 248, 243, 0.99) 0%, rgba(232, 241, 234, 0.99) 100%);
+}
+
+.snapshot-export-mode .snapshot-head {
+    align-items: start;
+}
+
+.snapshot-export-mode h2 {
+    font-size: 3rem;
+}
+
+.snapshot-export-mode .section-kicker {
+    font-size: 1.05rem;
+    margin-bottom: 12px;
+}
+
+.snapshot-export-mode .sheet-meta {
+    min-width: 280px;
+    font-size: 1.05rem;
+}
+
+.snapshot-export-mode .summary-table {
+    margin-top: 28px;
+    border-radius: 30px;
+}
+
+.snapshot-export-mode .summary-header,
+.snapshot-export-mode .summary-item {
+    grid-template-columns: minmax(0, 2fr) 120px 200px 180px;
+    gap: 18px;
+    padding: 18px 24px;
+    font-size: 1.05rem;
+}
+
+.snapshot-export-mode .summary-item span:first-child,
+.snapshot-export-mode .summary-header span:first-child {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.snapshot-export-mode .summary-footer {
+    margin-top: 28px;
+    gap: 14px;
+}
+
+.snapshot-export-mode .summary-footer p {
+    font-size: 1.28rem;
+}
+
+.snapshot-export-mode .summary-footer strong {
+    font-size: 2.2rem;
+}
+
 .snapshot-panel {
     position: sticky;
     top: 20px;
