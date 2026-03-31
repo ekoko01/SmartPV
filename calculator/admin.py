@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.db.models import Max
+from django.db.models import Max, Sum
 
-from .models import Product
+from .models import Order, OrderItem, Product
 
 
 @admin.register(Product)
@@ -63,5 +63,59 @@ class ProductAdmin(admin.ModelAdmin):
 
     class Media:
         css = {"all": ("admin/pvsmart-admin.css",)}
+
+
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+    can_delete = False
+    readonly_fields = (
+        "product_name",
+        "unit_price",
+        "unit_pv",
+        "quantity",
+        "line_total",
+        "line_pv",
+    )
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = (
+        "customer_name",
+        "line_count",
+        "total_price",
+        "total_pv",
+        "snapshot_generated_at",
+        "saved_by_name",
+    )
+    list_filter = ("snapshot_generated_at",)
+    date_hierarchy = "snapshot_generated_at"
+    search_fields = ("customer_name", "items__product_name")
+    readonly_fields = (
+        "customer_name",
+        "line_count",
+        "total_price",
+        "total_pv",
+        "snapshot_generated_at",
+        "saved_by_name",
+        "created_at",
+    )
+    inlines = [OrderItemInline]
+
+    def changelist_view(self, request, extra_context=None):
+        queryset = self.get_queryset(request)
+        extra_context = extra_context or {}
+        totals = queryset.aggregate(
+            gross_sales=Sum("total_price"),
+            gross_pv=Sum("total_pv"),
+            total_orders=Sum("line_count"),
+        )
+        extra_context["order_summary"] = {
+            "gross_sales": totals["gross_sales"] or 0,
+            "gross_pv": totals["gross_pv"] or 0,
+            "total_orders": queryset.count(),
+        }
+        return super().changelist_view(request, extra_context=extra_context)
 
 # Register your models here.

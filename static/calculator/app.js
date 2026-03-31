@@ -10,27 +10,53 @@ const formatPv = (value) =>
         maximumFractionDigits: 2,
     }).format(value);
 
-const quantityInputs = [...document.querySelectorAll(".quantity-input")];
-const rows = [...document.querySelectorAll(".product-row")];
+const orderRows = document.getElementById("order-rows");
+const rowTemplate = document.getElementById("order-row-template");
+const customerNameInput = document.getElementById("customer-name");
+const summaryCustomer = document.getElementById("summary-customer");
+const summaryDatetime = document.getElementById("summary-datetime");
 const summaryItems = document.getElementById("summary-items");
 const grandTotal = document.getElementById("grand-total");
 const grandPv = document.getElementById("grand-pv");
 const sheetTotal = document.getElementById("sheet-total");
 const sheetPv = document.getElementById("sheet-pv");
-const customerNameInput = document.getElementById("customer-name");
-const summaryCustomer = document.getElementById("summary-customer");
+const addRowButton = document.getElementById("add-row");
 const clearAllButton = document.getElementById("clear-all");
+const saveOrderButton = document.getElementById("save-order");
+const saveStatus = document.getElementById("save-status");
+const snapshotCard = document.getElementById("snapshot-card");
 
-function animateValue(element, nextValue, suffix = "") {
+function getCsrfToken() {
+    const value = `; ${document.cookie}`;
+    const parts = value.split("; csrftoken=");
+    if (parts.length === 2) {
+        return parts.pop().split(";").shift();
+    }
+    return "";
+}
+
+function updateTimestamp() {
+    summaryDatetime.textContent = new Intl.DateTimeFormat("th-TH", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    }).format(new Date());
+}
+
+function animateValue(element, nextValue, options = {}) {
+    const { suffix = "", formatter = "pv" } = options;
     const currentValue = Number(element.dataset.value || 0);
     const start = performance.now();
-    const duration = 280;
+    const duration = 240;
 
     function step(now) {
         const progress = Math.min((now - start) / duration, 1);
         const eased = 1 - Math.pow(1 - progress, 3);
         const value = currentValue + (nextValue - currentValue) * eased;
-        element.textContent = `${suffix === "บาท" ? formatMoney(value) : formatPv(value)}${suffix ? ` ${suffix}` : ""}`;
+        const formattedValue = formatter === "money" ? formatMoney(value) : formatPv(value);
+        element.textContent = `${formattedValue}${suffix ? ` ${suffix}` : ""}`;
         if (progress < 1) {
             requestAnimationFrame(step);
         } else {
@@ -41,33 +67,77 @@ function animateValue(element, nextValue, suffix = "") {
     requestAnimationFrame(step);
 }
 
-function refreshSummary() {
-    const selectedItems = [];
-    let totalPrice = 0;
-    let totalPv = 0;
+function createRow() {
+    const fragment = rowTemplate.content.cloneNode(true);
+    const row = fragment.querySelector(".order-row");
 
-    rows.forEach((row) => {
+    row.querySelector(".product-select").addEventListener("change", refreshSummary);
+    row.querySelector(".quantity-input").addEventListener("input", refreshSummary);
+    row.querySelector(".increment").addEventListener("click", () => {
         const input = row.querySelector(".quantity-input");
-        const quantity = Number(input.value || 0);
-        const price = Number(row.dataset.price);
-        const pv = Number(row.dataset.pv);
-        const itemPv = quantity * pv;
-        const itemPrice = quantity * price;
-
-        row.querySelector(".pv-chip").textContent = `${formatPv(itemPv)} PV`;
-
-        if (quantity > 0) {
-            selectedItems.push({
-                name: row.dataset.name,
-                quantity,
-                totalPrice: itemPrice,
-                totalPv: itemPv,
-            });
-        }
-
-        totalPrice += itemPrice;
-        totalPv += itemPv;
+        input.value = Number(input.value || 0) + 1;
+        refreshSummary();
     });
+    row.querySelector(".decrement").addEventListener("click", () => {
+        const input = row.querySelector(".quantity-input");
+        input.value = Math.max(1, Number(input.value || 1) - 1);
+        refreshSummary();
+    });
+    row.querySelector(".remove-row").addEventListener("click", () => {
+        row.remove();
+        if (!orderRows.children.length) {
+            orderRows.appendChild(createRow());
+        }
+        refreshSummary();
+    });
+
+    return row;
+}
+
+function getSelectedItemData(row) {
+    const select = row.querySelector(".product-select");
+    const selectedOption = select.options[select.selectedIndex];
+    const quantity = Math.max(1, Number(row.querySelector(".quantity-input").value || 1));
+
+    if (!select.value) {
+        row.querySelector(".unit-price").textContent = "0.00 บาท";
+        row.querySelector(".unit-pv").textContent = "0 PV";
+        row.querySelector(".line-total").textContent = "0.00 บาท";
+        row.querySelector(".line-pv").textContent = "0 PV";
+        return null;
+    }
+
+    const price = Number(selectedOption.dataset.price);
+    const pv = Number(selectedOption.dataset.pv);
+    const lineTotal = price * quantity;
+    const linePv = pv * quantity;
+
+    row.querySelector(".unit-price").textContent = `${formatMoney(price)} บาท`;
+    row.querySelector(".unit-pv").textContent = `${formatPv(pv)} PV`;
+    row.querySelector(".line-total").textContent = `${formatMoney(lineTotal)} บาท`;
+    row.querySelector(".line-pv").textContent = `${formatPv(linePv)} PV`;
+
+    return {
+        productSku: select.value,
+        name: selectedOption.dataset.name,
+        quantity,
+        unitPrice: price,
+        unitPv: pv,
+        lineTotal,
+        linePv,
+    };
+}
+
+function refreshSummary() {
+    updateTimestamp();
+    summaryCustomer.textContent = customerNameInput.value.trim() || "ยังไม่ได้ระบุชื่อลูกค้า";
+
+    const selectedItems = [...orderRows.querySelectorAll(".order-row")]
+        .map(getSelectedItemData)
+        .filter(Boolean);
+
+    const totalPrice = selectedItems.reduce((sum, item) => sum + item.lineTotal, 0);
+    const totalPv = selectedItems.reduce((sum, item) => sum + item.linePv, 0);
 
     summaryItems.innerHTML = selectedItems
         .map(
@@ -75,32 +145,93 @@ function refreshSummary() {
             <div class="summary-item">
                 <span>${item.name}</span>
                 <span>${item.quantity}</span>
-                <span>${formatMoney(item.totalPrice)}</span>
-                <span>${formatPv(item.totalPv)}</span>
+                <span>${formatMoney(item.lineTotal)}</span>
+                <span>${formatPv(item.linePv)}</span>
             </div>
         `
         )
         .join("");
 
-    animateValue(grandTotal, totalPrice);
-    animateValue(sheetTotal, totalPrice, "บาท");
+    animateValue(grandTotal, totalPrice, { formatter: "money" });
     animateValue(grandPv, totalPv);
+    animateValue(sheetTotal, totalPrice, { suffix: "บาท", formatter: "money" });
     animateValue(sheetPv, totalPv);
 }
 
-quantityInputs.forEach((input) => {
-    input.addEventListener("input", refreshSummary);
-});
+async function saveOrder() {
+    const customerName = customerNameInput.value.trim();
+    const items = [...orderRows.querySelectorAll(".order-row")]
+        .map(getSelectedItemData)
+        .filter(Boolean)
+        .map((item) => ({
+            product_sku: item.productSku,
+            quantity: item.quantity,
+        }));
 
-customerNameInput.addEventListener("input", () => {
-    summaryCustomer.textContent = customerNameInput.value || "ไม่ระบุชื่อลูกค้า";
+    if (!customerName) {
+        saveStatus.textContent = "กรุณากรอกชื่อลูกค้าก่อนบันทึก";
+        return;
+    }
+
+    if (!items.length) {
+        saveStatus.textContent = "กรุณาเลือกรายการสินค้าอย่างน้อย 1 รายการ";
+        return;
+    }
+
+    saveOrderButton.disabled = true;
+    saveStatus.textContent = "กำลังบันทึกรูปภาพและออเดอร์...";
+
+    try {
+        const canvas = await window.html2canvas(snapshotCard, {
+            backgroundColor: "#eef5ef",
+            scale: 2,
+        });
+        const link = document.createElement("a");
+        const safeCustomer = customerName.replace(/\s+/g, "-");
+        link.download = `pvsmart-${safeCustomer}-${Date.now()}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+
+        const response = await fetch("/api/orders/save/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCsrfToken(),
+            },
+            body: JSON.stringify({
+                customer_name: customerName,
+                items,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error("save_failed");
+        }
+
+        const data = await response.json();
+        saveStatus.textContent = `บันทึกสำเร็จ ออเดอร์ #${data.order_id} และดาวน์โหลดรูปภาพแล้ว`;
+    } catch (error) {
+        saveStatus.textContent = "บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
+    } finally {
+        saveOrderButton.disabled = false;
+    }
+}
+
+addRowButton.addEventListener("click", () => {
+    orderRows.appendChild(createRow());
 });
 
 clearAllButton.addEventListener("click", () => {
-    quantityInputs.forEach((input) => {
-        input.value = 0;
-    });
+    orderRows.innerHTML = "";
+    orderRows.appendChild(createRow());
+    customerNameInput.value = "";
     refreshSummary();
+    saveStatus.textContent = "";
 });
 
+customerNameInput.addEventListener("input", refreshSummary);
+saveOrderButton.addEventListener("click", saveOrder);
+
+orderRows.appendChild(createRow());
+updateTimestamp();
 refreshSummary();

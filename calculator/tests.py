@@ -2,10 +2,12 @@ from django.test import TestCase
 from django.urls import reverse
 from django.core.management import call_command
 from django.contrib.auth import get_user_model
+from decimal import Decimal
+import json
 from io import StringIO
 from unittest.mock import patch
 
-from .models import Product
+from .models import Order, OrderItem, Product
 
 
 class CalculatorPageTests(TestCase):
@@ -13,7 +15,7 @@ class CalculatorPageTests(TestCase):
         response = self.client.get(reverse("calculator:home"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "ระบบช่วยคำนวณราคาและคะแนน PV อัตโนมัติ")
+        self.assertContains(response, "พื้นที่สรุปออเดอร์เดียวที่พร้อมขาย พร้อมส่ง และพร้อมเก็บรายงาน")
 
     def test_seed_products_command_populates_catalog(self):
         call_command("seed_products")
@@ -58,5 +60,35 @@ class EnsureSuperuserCommandTests(TestCase):
 
         User = get_user_model()
         self.assertTrue(User.objects.filter(username="renderadmin", is_superuser=True).exists())
+
+
+class SaveOrderViewTests(TestCase):
+    def setUp(self):
+        call_command("seed_products")
+        self.product = Product.objects.get(sku="CLD-01")
+
+    def test_save_order_creates_order_and_items(self):
+        response = self.client.post(
+            reverse("calculator:save_order"),
+            data=json.dumps(
+                {
+                    "customer_name": "นางพิมใจ จันทร์",
+                    "items": [
+                        {
+                            "product_sku": self.product.sku,
+                            "quantity": 2,
+                        }
+                    ],
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Order.objects.count(), 1)
+        self.assertEqual(OrderItem.objects.count(), 1)
+        order = Order.objects.first()
+        self.assertEqual(order.customer_name, "นางพิมใจ จันทร์")
+        self.assertEqual(order.total_price, Decimal("1980.00"))
 
 # Create your tests here.
